@@ -1,6 +1,15 @@
 packages: []
 
+# pnpm 11 defaults to blocking packages published within the last 24h.
+# Set to 0 to opt out and restore pnpm 10 install behavior.
+minimumReleaseAge: 0
+
+# The default (true) silently pulls in optional peers of transitive deps (e.g.
+# kysely-codegen's better-sqlite3). Declare needed peers in package.json instead.
+autoInstallPeers: false
+
 allowBuilds:
   sharp: true
   unrs-resolver: true
   msw: false
+  esbuild: true
