@@ -1,8 +1,8 @@
 import { uuid } from "@/utils/crypto"
-import { invalidInput, type FormResultWithError } from "@/utils/errors"
+import { invalidInput, notFound } from "@/utils/errors"
 import { ok } from "@/utils/result"
 import type { UserRepository } from "./repo"
-import type { User, UserId } from "./model"
+import type { UserId } from "./model"
 
 export const createUserService = (repo: UserRepository) => {
   return {
@@ -20,7 +20,11 @@ export const createUserService = (repo: UserRepository) => {
       await repo.createUser(user)
       return ok(user)
     },
-    deleteUser: async (id: UserId) => repo.deleteUser(id),
+    deleteUser: async (id: UserId) => {
+      const deleted = await repo.deleteUser(id)
+      if (!deleted) return notFound("User")
+      return ok(true)
+    },
   }
 }
 

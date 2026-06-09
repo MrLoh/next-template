@@ -3,13 +3,13 @@ import type { User, UserId } from "./model"
 
 export const createUserRepository = (db: DbClient) => {
   return {
-    getUser: async (id: string): Promise<User | undefined> => {
+    getUser: async (id: string): Promise<User | null> => {
       const user = await db
         .selectFrom("users")
         .select(["id", "name", "created_at"])
         .where("id", "=", id)
         .executeTakeFirst()
-      if (!user) return undefined
+      if (!user) return null
       return {
         id: user.id as UserId,
         name: user.name,
@@ -38,8 +38,13 @@ export const createUserRepository = (db: DbClient) => {
         })
         .execute()
     },
-    deleteUser: async (id: UserId) => {
-      await db.deleteFrom("users").where("id", "=", id).execute()
+    deleteUser: async (id: UserId): Promise<boolean> => {
+      const result = await db
+        .deleteFrom("users")
+        .where("id", "=", id)
+        .returning("id")
+        .executeTakeFirst()
+      return Boolean(result?.id)
     },
   }
 }
