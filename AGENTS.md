@@ -10,10 +10,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 Imports use the `@/` alias (repo root). Scripts: `dev`, `build`, `lint`, `typecheck`, `test` (vitest), `format` (prettier), `migrate`.
 
+- Always inline logic at its single call site instead of extracting one-off helpers by default.
+
 ## Errors as values (`utils/result.ts`, `utils/errors.ts`)
 
 - Never throw across the server boundary — return a `Result<D, E>`. Check `result.ok`, then read `result.val` or `result.err`.
-- Return success with `ok(val)`. For errors, use the typed constructors (`notFound`, `unauthorized`, `invalidInput`, `constraintViolation`, `bug`, ...) rather than calling `err` directly. `invalidInput` drives form field errors; other types surface as dialogs.
+- Return success with `ok(val)`. For errors, use the typed constructors (`notFound`, `forbidden`, `invalidInput`, `bug`, ...) rather than calling `err` directly. `invalidInput` drives form field errors; other types surface as dialogs.
 - Wrap throwing code with `catchBug(origin, fn)` to convert exceptions into a `BUG` result.
 
 ## Data layer (`data/`)

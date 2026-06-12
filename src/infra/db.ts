@@ -17,9 +17,5 @@ pool.on('error', (e) => {
 
 export const createDbClient = () => new Kysely<DB>({ dialect: new PostgresDialect({ pool }) })
 
-const db = createDbClient()
-
 export type DbClient = ReturnType<typeof createDbClient>
 export { sql } from 'kysely'
-
-export default db

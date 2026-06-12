@@ -1,12 +1,8 @@
 'use server'
 
-import db from '@/infra/db'
+import withContext from './context'
+import { userService } from './users'
 
-import { createUserService } from './users'
-import { createUserRepository } from './users/repo'
-
-export const { getUser, listUsers, createUser, deleteUser } = createUserService(
-  createUserRepository(db),
-)
+export const { getUser, listUsers, createUser, deleteUser } = withContext('users', userService)
 
 export type { User, UserId } from './users/model'

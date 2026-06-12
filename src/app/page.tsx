@@ -1,10 +1,11 @@
 import { listUsers } from '@/data'
+import { unwrap } from '@/utils/unwrap'
 
 import { CreateUserForm } from './create-user-form'
 import { DeleteUserButton } from './delete-user-button'
 
 export default async function Page() {
-  const users = await listUsers()
+  const users = await unwrap(listUsers())
 
   return (
     <div className="flex min-h-svh p-6">

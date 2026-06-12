@@ -21,19 +21,27 @@ export type Unauthenticated = { type: 'UNAUTHENTICATED' }
  */
 export const unauthenticated = (): ErrResult<Unauthenticated> => err({ type: 'UNAUTHENTICATED' })
 
-/** The authenticated user is missing permissions to access or act on a specific resource */
-export type Unauthorized = {
-  type: 'UNAUTHORIZED'
-  /** string explaining why the user is not authorized, should not end with a period */
-  reason: string
+/**
+ * The user may not access or perform the requested action.
+ *
+ * @remarks
+ * Covers missing permissions, business-rule violations, and other cases where the request is
+ * understood but cannot be fulfilled. Use `invalidInput` when a specific form field is at fault.
+ */
+export type Forbidden = {
+  type: 'FORBIDDEN'
+  /** why the request cannot proceed; omitted on the Next.js forbidden page */
+  reason?: string
 }
 
 /**
- * This constructor creates an Unauthorized Error Result
- * @param reason - The reason the user is not authorized
+ * This constructor creates a Forbidden Error Result
+ * @param reason - why the request cannot proceed
  */
-export const unauthorized = (reason: string): ErrResult<Unauthorized> =>
-  err({ type: 'UNAUTHORIZED', reason })
+export const forbidden = (reason: string): ErrResult<Forbidden> => {
+  console.info('Forbidden', { reason })
+  return err({ type: 'FORBIDDEN', reason })
+}
 
 /** The requested resource does not exist */
 export type NotFound = {
@@ -98,29 +106,6 @@ export const invalidInput = <E extends { [fieldName: string]: string }>(
   return err({ type: 'INVALID_INPUT', fieldErrors })
 }
 
-/**
- * The action violates system or business constraints.
-
- * @remarks
- * We return this when an operation cannot be completed because it conflicts with business rules,
- * domain model invariants, or system constraints. This includes situations like violating unique
- * constraints, attempting illegal state transitions, or conflicts arising from concurrent
- * modifications. Use this instead of unauthorized when an action is allowed in general, and the
- * specific inputs are valid but violating some business rule. Use invalid input instead if
- * there is a specific field in a form that is causing the issue. This will lead to a popup dialog,
- * not a form field error.
- */
-export type ConstraintViolation = { type: 'CONSTRAINT_VIOLATION'; constraint: string }
-
-/**
- * This constructor creates a ConstraintViolation Error Result
- * @param constraint - The constraint that was violated
- */
-export const constraintViolation = (constraint: string): ErrResult<ConstraintViolation> => {
-  console.info('Constraint violation', { constraint })
-  return err({ type: 'CONSTRAINT_VIOLATION', constraint })
-}
-
 /** A bug that occurred on the server side that should be gracefully handled by the frontend
  * @remarks always call `bug` to create a Bug result and capture sensitive error details */
 export type Bug = {
@@ -181,19 +166,12 @@ export const catchBug = async <F extends () => Promise<unknown>>(
       : await expression()
 
     return ok(res as Awaited<ReturnType<F>>)
-    // eslint-disable-next-line no-catch-all/no-catch-all -- returns all errors as bug results
   } catch (e) {
     return bug(origin, e)
   }
 }
 
-export type ResultError =
-  | Unauthenticated
-  | Unauthorized
-  | NotFound
-  | Unavailable
-  | ConstraintViolation
-  | Bug
+export type ResultError = Unauthenticated | Forbidden | NotFound | Unavailable | Bug
 
 export type FormResultError = ResultError | InvalidInput
 
