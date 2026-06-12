@@ -4,7 +4,7 @@ export const register = async () => {
 
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     // Lifecycle handlers: Next.js manages process exit itself, so we only flip flags and close clients.
-    const { onShutdownStart, onShutdownFinish } = await import('@/data/context')
+    const { onShutdownStart, onShutdownFinish } = await import('@/infra')
     process.on('SIGINT', () => onShutdownStart())
     process.on('SIGTERM', () => onShutdownStart())
     process.on('beforeExit', async () => {

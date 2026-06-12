@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useActionState } from 'react'
 
 import { Button } from '@/components/button'
+import { Input } from '@/components/input'
 import { createUser, type User } from '@/data'
 import type { FormResultWithError } from '@/utils/errors'
 
@@ -25,12 +26,12 @@ export function CreateUserForm() {
   return (
     <form action={formAction} className="flex flex-col gap-1">
       <div className="flex gap-2">
-        <input
+        <Input
           name="name"
           type="text"
           placeholder="Name"
           aria-invalid={nameError ? true : undefined}
-          className="h-9 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
+          className="min-w-0 flex-1"
         />
         <Button type="submit" disabled={pending}>
           Add

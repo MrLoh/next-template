@@ -1,10 +1,10 @@
-import type { DbClient } from '@/infra/db'
+import type { DB } from '@/infra/db'
 
 import type { User, UserId } from './model'
 
 const userRepository = {
-  getUser: async (db: DbClient, id: string): Promise<User | null> => {
-    const user = await db
+  getUser: async (tx: DB, id: string): Promise<User | null> => {
+    const user = await tx
       .selectFrom('users')
       .select(['id', 'name', 'created_at'])
       .where('id', '=', id)
@@ -12,8 +12,8 @@ const userRepository = {
     if (!user) return null
     return { id: user.id as UserId, name: user.name, createdAt: new Date(user.created_at) }
   },
-  listUsers: async (db: DbClient): Promise<User[]> => {
-    const users = await db
+  listUsers: async (tx: DB): Promise<User[]> => {
+    const users = await tx
       .selectFrom('users')
       .select(['id', 'name', 'created_at'])
       .orderBy('created_at', 'desc')
@@ -24,14 +24,14 @@ const userRepository = {
       createdAt: new Date(user.created_at),
     }))
   },
-  insertUser: async (db: DbClient, user: User) => {
-    await db
+  insertUser: async (tx: DB, user: User) => {
+    await tx
       .insertInto('users')
       .values({ id: user.id, name: user.name, created_at: user.createdAt.toISOString() })
       .execute()
   },
-  deleteUser: async (db: DbClient, id: UserId): Promise<boolean> => {
-    const result = await db
+  deleteUser: async (tx: DB, id: UserId): Promise<boolean> => {
+    const result = await tx
       .deleteFrom('users')
       .where('id', '=', id)
       .returning('id')

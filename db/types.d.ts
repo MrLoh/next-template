@@ -20,6 +20,6 @@ export interface Users {
   name: string
 }
 
-export interface DB {
+export interface DbTypes {
   users: Users
 }

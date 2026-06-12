@@ -1,7 +1,8 @@
-import { Geist, Geist_Mono, Inter } from 'next/font/google'
+import { Geist_Mono, Inter } from 'next/font/google'
 
 import './globals.css'
 
+import { DialogProvider } from '@/components/dialog'
 import { ThemeProvider } from '@/components/theme-provider'
 import { cn } from '@/utils/styling'
 
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={cn('antialiased', fontMono.variable, 'font-sans', inter.variable)}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <DialogProvider>{children}</DialogProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

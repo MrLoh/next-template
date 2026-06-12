@@ -1,6 +1,6 @@
 import { mapValues } from 'lodash-es'
 
-import { check, isDraining } from '@/data/context'
+import { check, isDraining } from '@/infra'
 
 export const dynamic = 'force-dynamic'
 

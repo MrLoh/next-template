@@ -1,6 +1,7 @@
 import { listUsers } from '@/data'
 import { unwrap } from '@/utils/unwrap'
 
+import { AskQuestionForm } from './ask-question-form'
 import { CreateUserForm } from './create-user-form'
 import { DeleteUserButton } from './delete-user-button'
 
@@ -9,7 +10,7 @@ export default async function Page() {
 
   return (
     <div className="flex min-h-svh p-6">
-      <div className="flex w-full max-w-md min-w-0 flex-col gap-6">
+      <div className="flex w-full max-w-2xl min-w-0 flex-col gap-10">
         <div>
           <h1 className="text-lg font-medium">Users</h1>
           <p className="text-sm text-muted-foreground">
@@ -34,6 +35,16 @@ export default async function Page() {
             ))}
           </ul>
         )}
+
+        <div className="flex flex-col gap-3 border-t border-border pt-10">
+          <div>
+            <h2 className="text-lg font-medium">Agent</h2>
+            <p className="text-sm text-muted-foreground">
+              Ask a question and get an answer from the configured LLM.
+            </p>
+          </div>
+          <AskQuestionForm />
+        </div>
       </div>
     </div>
   )

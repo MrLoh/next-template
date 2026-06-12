@@ -44,6 +44,7 @@ export const runKyselyCodegen = async (
     verify: options?.verify ?? false,
   })
   let content = await fs.readFile(outFile, 'utf8')
+  content = content.replace(/^export interface DB\b/m, 'export interface DbTypes')
   if (options?.replace) {
     const [search, replace] = options.replace
     content = content.replace(search, replace)

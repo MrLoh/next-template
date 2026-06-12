@@ -3,7 +3,7 @@ import { Pool } from 'pg'
 
 import config from '@/config'
 
-import type { DB } from '../../db/types'
+import type { DbTypes } from '../../db/types'
 
 const pool = new Pool({
   connectionString: config.DATABASE_URL,
@@ -15,7 +15,7 @@ pool.on('error', (e) => {
   console.error('postgres pool error', e)
 })
 
-export const createDbClient = () => new Kysely<DB>({ dialect: new PostgresDialect({ pool }) })
+export const createDbClient = () => new Kysely<DbTypes>({ dialect: new PostgresDialect({ pool }) })
 
-export type DbClient = ReturnType<typeof createDbClient>
+export type DB = Kysely<DbTypes>
 export { sql } from 'kysely'

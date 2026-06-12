@@ -1,4 +1,4 @@
-import { isDraining } from '@/data/context'
+import { isDraining } from '@/infra'
 
 export const dynamic = 'force-dynamic'
 

@@ -40,7 +40,7 @@ Imports use the `@/` alias (repo root). Scripts: `dev`, `build`, `lint`, `typech
 
 - Server components are `async` and call data actions directly; mark client components with `"use client"`.
 - Mutations use `<form action={...}>` + `useActionState`, then `router.refresh()` from `next/navigation`.
-- UI components come from shadcn (in `components/`, see `components.json`), built on `@base-ui/react` primitives. Add new ones with the `shadcn` CLI rather than hand-rolling. Style with Tailwind v4 via `cn()` (`utils/styling.ts`) and `cva` variants. Reuse `utils/formatting.ts` helpers.
+- UI components come from shadcn (in `components/`, see `components.json`), built on `@base-ui/react` primitives. Add new ones with the `shadcn` CLI rather than hand-rolling. See `components` skill for CLI gotchas (overwrite prompts, providers, error dialogs). Style with Tailwind v4 via `cn()` (`utils/styling.ts`) and `cva` variants. Reuse `utils/formatting.ts` helpers.
 
 ## Config & tests
 
