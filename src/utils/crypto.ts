@@ -2,7 +2,8 @@
  * Module for cryptography: hashing (API secrets, passwords) and random tokens.
  */
 
-import { createHmac, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'crypto'
+import { createHash, createHmac, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'crypto'
+import { jwtVerify, SignJWT } from 'jose'
 
 import config from '@/config'
 
@@ -17,6 +18,15 @@ import config from '@/config'
 export const uuid = <T extends string = string>() => randomUUID() as T
 
 /**
+ * Hashes a string using SHA256
+ *
+ * @param string - the string to hash
+ * @returns the hashed string
+ */
+export const hash = (string: string): string =>
+  createHash('sha256').update(string, 'utf8').digest('hex')
+
+/**
  * Hashes a string using HMAC-SHA256 keyed with the server secret.
  *
  * @remarks
@@ -25,7 +35,7 @@ export const uuid = <T extends string = string>() => randomUUID() as T
  * @param string - the string to hash
  * @returns the hashed string
  */
-export const hash = (string: string): string =>
+export const secretHash = (string: string): string =>
   createHmac('sha256', config.SERVER_SECRET).update(string, 'utf8').digest('hex')
 
 // from https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt
@@ -77,7 +87,45 @@ export const verifyPasswordHash = async (
  * @returns true if the secret value matches the hash
  */
 export const verifySecretHash = (secret: string, hashedSecret: string) => {
-  const derivedSecret = hash(secret)
+  const derivedSecret = secretHash(secret)
   if (derivedSecret.length !== hashedSecret.length) return false
   return timingSafeEqual(Buffer.from(derivedSecret), Buffer.from(hashedSecret))
+}
+
+/**
+ * Signs a JWT with a secret
+ *
+ * @param payload - the payload to sign
+ * @param secret - the secret to use
+ * @param maxAge - the maximum age of the token
+ * @returns the signed token
+ */
+export const signJwt = async (
+  payload: { sub: string } & Record<string, unknown>,
+  maxAge: number,
+) => {
+  const { sub, ...claims } = payload
+  return await new SignJWT(claims)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(sub)
+    .setIssuedAt()
+    .setExpirationTime(`${maxAge / 1_000}s`)
+    .sign(new TextEncoder().encode(config.SERVER_SECRET))
+}
+
+/**
+ * Verifies a JWT with a secret
+ *
+ * @param token - the token to verify
+ * @param secret - the secret to use
+ * @returns the payload of the token
+ */
+export const verifyJwt = async (token: string) => {
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(config.SERVER_SECRET))
+    if (!payload.sub) return null
+    return payload
+  } catch {
+    return null
+  }
 }

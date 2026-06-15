@@ -4,7 +4,7 @@ import { agentService } from './agent'
 import withContext from './context'
 import { userService } from './users'
 
-export const { getUser, listUsers, createUser, deleteUser } = withContext('users', userService)
+export const { signUp, signIn, signOut, getCurrentUser } = withContext('users', userService)
 export const { answerQuestion } = withContext('agent', agentService)
 
-export type { User, UserId } from './users/model'
+export type { User, UserId } from './users/models'

@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withWorkflow } from 'workflow/next'
 
 const nextConfig: NextConfig = {
   output: process.env.DOCKER ? 'standalone' : undefined, // this env var is set from dockerfile
@@ -7,4 +8,4 @@ const nextConfig: NextConfig = {
   experimental: { authInterrupts: true },
 }
 
-export default nextConfig
+export default withWorkflow(nextConfig)

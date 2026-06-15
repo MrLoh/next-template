@@ -21,6 +21,7 @@ const getErrorContent = (error: ResultError): ErrorContent =>
     .with({ type: 'UNAUTHENTICATED' }, () => ({
       title: 'Login required',
       body: 'You need to log in to access this page.',
+      buttons: [{ label: 'Go to login', href: '/login' }],
     }))
     .with({ type: 'FORBIDDEN' }, (e) => ({
       title: 'Unable to proceed',
@@ -67,15 +68,17 @@ export const ErrorPage = (error: ResultError) => {
         <h1 className="text-lg font-medium">{content.title}</h1>
         <div className="text-sm text-muted-foreground">{content.body}</div>
         <div className="flex justify-center gap-2">
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            Go back
-          </Button>
+          {error.type !== 'UNAUTHENTICATED' && (
+            <Button type="button" variant="outline" onClick={() => router.back()}>
+              Go back
+            </Button>
+          )}
           {content.buttons?.map((button) => (
             <Button
               key={button.label}
-              type="button"
               variant={button.variant}
               onClick={button.onClick}
+              href={button.href}
             >
               {button.label}
             </Button>

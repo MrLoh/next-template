@@ -1,7 +1,16 @@
-import { hash, hashPassword, uuid, verifyPasswordHash } from './crypto'
+import {
+  hash,
+  hashPassword,
+  secretHash,
+  signJwt,
+  uuid,
+  verifyJwt,
+  verifyPasswordHash,
+  verifySecretHash,
+} from './crypto'
 
 describe('hash', () => {
-  it('should hash a string', () => {
+  it('should hash a string with SHA256', () => {
     // Given a string
     const value = 'test'
     // When I hash the string
@@ -9,10 +18,55 @@ describe('hash', () => {
     // Then I should get a hash back
     expect(hashValue).toBeDefined()
     expect(hashValue).not.toBe(value)
-    // And the hash should be a hex-encoded HMAC-SHA256 digest
+    // And the hash should be a hex-encoded SHA256 digest
     expect(hashValue).toMatch(/^[a-f0-9]{64}$/)
     // And the hash should be the same for the same string
     expect(hash(value)).toBe(hashValue)
+    expect(hashValue).toBe('9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08')
+  })
+})
+
+describe('secretHash', () => {
+  it('should hash a string with HMAC-SHA256', () => {
+    // Given a string
+    const value = 'test'
+    // When I hash the string
+    const hashValue = secretHash(value)
+    // Then I should get a hash back
+    expect(hashValue).toBeDefined()
+    expect(hashValue).not.toBe(value)
+    // And the hash should be a hex-encoded HMAC-SHA256 digest
+    expect(hashValue).toMatch(/^[a-f0-9]{64}$/)
+    // And the hash should be the same for the same string
+    expect(secretHash(value)).toBe(hashValue)
+  })
+})
+
+describe('verifySecretHash', () => {
+  it('should return true for a matching secret', () => {
+    // Given a secret and its hash
+    const secret = 'my-api-key'
+    const hashedSecret = secretHash(secret)
+    // When verifying the secret
+    const result = verifySecretHash(secret, hashedSecret)
+    // Then the result should be true
+    expect(result).toBe(true)
+  })
+
+  it('should return false for a non-matching secret', () => {
+    // Given a hash for a different secret
+    const hashedSecret = secretHash('correct-secret')
+    // When verifying with the wrong secret
+    const result = verifySecretHash('wrong-secret', hashedSecret)
+    // Then the result should be false
+    expect(result).toBe(false)
+  })
+
+  it('should return false for a hash with the wrong length', () => {
+    // Given a hash that is too short
+    const result = verifySecretHash('secret', 'tooshort')
+    // Then the result should be false
+    expect(result).toBe(false)
   })
 })
 
@@ -43,6 +97,54 @@ describe('hashPassword/verifyPasswordHash', () => {
     expect(result).toBe(true)
     // And the password hash should not verify for a different password
     expect(await verifyPasswordHash(Math.random().toString(), passwordHash)).toBe(false)
+  })
+
+  it('should return false for a malformed password hash', async () => {
+    // Given malformed password hashes
+    const password = 'password'
+    // When verifying against each malformed hash
+    const results = await Promise.all([
+      verifyPasswordHash(password, 'invalid'),
+      verifyPasswordHash(password, 'onlysalt:'),
+      verifyPasswordHash(password, ':onlyhash'),
+    ])
+    // Then every result should be false
+    expect(results).toEqual([false, false, false])
+  })
+})
+
+describe('signJwt/verifyJwt', () => {
+  it('should sign and verify a JWT', async () => {
+    // Given a payload
+    const payload = { sub: 'user-1', kind: 'user', displayName: 'alice' }
+    // When signing and verifying the token
+    const token = await signJwt(payload)
+    const { payload: verified } = await verifyJwt(token)
+    // Then the verified payload should match
+    expect(verified.sub).toBe('user-1')
+    expect(verified.kind).toBe('user')
+    expect(verified.displayName).toBe('alice')
+    expect(verified.iat).toBeDefined()
+    expect(verified.exp).toBeDefined()
+  })
+
+  it('should honor a custom max age', async () => {
+    // Given a custom max age of 60 seconds
+    const maxAge = 60_000
+    // When signing and verifying the token
+    const token = await signJwt({ sub: 'user-1' }, maxAge)
+    const { payload } = await verifyJwt(token)
+    // Then the token should expire in 60 seconds
+    expect(payload.exp! - payload.iat!).toBe(60)
+  })
+
+  it('should reject an invalid token', async () => {
+    // Given an invalid token
+    const token = 'not-a-jwt'
+    // When verifying the token
+    const verify = verifyJwt(token)
+    // Then verification should fail
+    await expect(verify).rejects.toThrow()
   })
 })
 

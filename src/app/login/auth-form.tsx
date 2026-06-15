@@ -5,15 +5,16 @@ import { useActionState } from 'react'
 
 import { Button } from '@/components/button'
 import { Input } from '@/components/input'
-import { createUser, type User } from '@/data'
+import { signIn, signUp, type User } from '@/data'
 import type { FormResultWithError } from '@/utils/errors'
 
-export function CreateUserForm() {
+export function AuthForm({ isRegister }: { isRegister: boolean }) {
   const router = useRouter()
   const [state, formAction, pending] = useActionState(
     async (_prev: FormResultWithError<User> | undefined, formData: FormData) => {
-      const result = await createUser({ name: String(formData.get('name') ?? '') })
-      if (result.ok) router.refresh()
+      const name = String(formData.get('name') ?? '')
+      const result = isRegister ? await signUp({ name }) : await signIn({ name })
+      if (result.ok) router.push('/')
       return result
     },
     undefined,
@@ -29,12 +30,12 @@ export function CreateUserForm() {
         <Input
           name="name"
           type="text"
-          placeholder="Name"
+          placeholder="Username"
           aria-invalid={nameError ? true : undefined}
-          className="min-w-0 flex-1"
+          className="-ml-2.5 min-w-0 flex-1"
         />
         <Button type="submit" disabled={pending}>
-          Add
+          {isRegister ? 'Register' : 'Log in'}
         </Button>
       </div>
       {nameError && <p className="text-sm text-destructive">{nameError}</p>}

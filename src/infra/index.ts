@@ -4,9 +4,9 @@ import { catchBug } from '@/utils/errors'
 
 export const db = createDbClient()
 export const llm = createLanguageModel()
-
 export type { DB } from '@/infra/db'
 export type { LLM as LanguageModel }
+export { type Principal, type Scope, auth, type Auth } from '@/infra/auth'
 
 let draining = false
 

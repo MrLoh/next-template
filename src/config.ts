@@ -40,6 +40,8 @@ const env = createEnv({
       .optional(),
     OPENAI_API_KEY: z.string().min(1).optional(),
     ANTHROPIC_API_KEY: z.string().min(1).optional(),
+    SESSION_COOKIE_NAME: z.string().default('bearer'),
+    SESSION_MAX_AGE: duration.optional(),
   },
   runtimeEnv: process.env as Record<string, string | undefined>,
 })
@@ -54,6 +56,7 @@ const config = {
   // connections quickly outside prod so we don't run out of slots.
   DATABASE_POOL_TIMEOUT:
     env.DATABASE_POOL_TIMEOUT ?? (env.NODE_ENV === 'production' ? 10 * 60 * 1000 : 10 * 1000),
+  SESSION_MAX_AGE: env.SESSION_MAX_AGE ?? 7 * 24 * 60 * 60 * 1000,
   // Parsed LLM config. Set LLM_MODEL="" to disable.
   get LLM_MODEL(): {
     providerName: 'openai' | 'anthropic'

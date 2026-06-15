@@ -14,10 +14,13 @@ export type Generated<T> =
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>
 
+export type UserRole = 'clinician' | 'patient'
+
 export interface Users {
   created_at: Generated<Timestamp>
   id: string
   name: string
+  role: Generated<UserRole>
 }
 
 export interface DbTypes {

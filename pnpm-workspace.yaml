@@ -13,3 +13,5 @@ allowBuilds:
   unrs-resolver: true
   msw: false
   esbuild: true
+  '@swc/core': true
+  cbor-extract: true

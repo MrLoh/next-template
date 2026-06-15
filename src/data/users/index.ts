@@ -1,32 +1,51 @@
 import { uuid } from '@/utils/crypto'
-import { invalidInput, notFound } from '@/utils/errors'
+import { invalidInput, unauthenticated } from '@/utils/errors'
 import { ok } from '@/utils/result'
 
 import type { Ctx } from '../context'
-import type { UserId } from './model'
-import userRepository from './repo'
+import type { UserId } from './models'
+import userRepository from './repository'
 
 export const userService = {
-  getUser: async ({ db }: Ctx, id: string) => {
-    const user = await userRepository.getUser(db, id)
-    if (!user) return notFound('User')
-    return ok(user)
-  },
-  listUsers: async ({ db }: Ctx) => {
-    return ok(await userRepository.listUsers(db))
-  },
-  createUser: async ({ db }: Ctx, { name }: { name: string }) => {
-    const trimmed = name.trim()
-    if (!trimmed) return invalidInput({ name: 'Name is required' })
+  signUp: async ({ db, auth }: Ctx, { name }: { name: string }) => {
+    name = name.trim()
+    if (!name) return invalidInput({ name: 'Username is required' })
 
-    const user = { id: uuid<UserId>(), name: trimmed, createdAt: new Date() }
+    if (await userRepository.findByName(db, name)) {
+      return invalidInput({ name: 'Username is already taken' })
+    }
+
+    const user = { id: uuid<UserId>(), name, role: 'patient' as const, createdAt: new Date() }
     await userRepository.insertUser(db, user)
+    await auth.setSessionCookie(user)
+
     return ok(user)
   },
-  deleteUser: async ({ db }: Ctx, id: UserId) => {
-    const deleted = await userRepository.deleteUser(db, id)
-    if (!deleted) return notFound('User')
+
+  signIn: async ({ db, auth }: Ctx, { name }: { name: string }) => {
+    name = name.trim()
+    if (!name) return invalidInput({ name: 'Username is required' })
+
+    const user = await userRepository.findByName(db, name)
+    if (!user) return invalidInput({ name: 'Unknown username' })
+
+    await auth.setSessionCookie(user)
+    return ok(user)
+  },
+
+  signOut: async ({ auth }: Ctx) => {
+    await auth.deleteSessionCookie()
     return ok(true)
+  },
+
+  getCurrentUser: async ({ auth, db }: Ctx) => {
+    if (!auth.principal) return unauthenticated()
+    const user = await userRepository.getUser(db, auth.principal.id)
+    if (!user) {
+      await auth.deleteSessionCookie()
+      return unauthenticated()
+    }
+    return ok(user)
   },
 }
 

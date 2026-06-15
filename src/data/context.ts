@@ -2,14 +2,18 @@ import { trace } from '@opentelemetry/api'
 import { lowerCase } from 'lodash-es'
 import { unstable_rethrow } from 'next/navigation'
 
-import { db, llm, type DB, type LanguageModel } from '@/infra'
+import { auth, db, llm, type Auth, type DB, type LanguageModel, type Principal } from '@/infra'
 import { createDigestCode, type Bug } from '@/utils/errors'
 import { err, type ErrResult } from '@/utils/result'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- needed for type inference
 export type Tail<T extends unknown[]> = T extends [infer _, ...infer Rest] ? Rest : never
 
-export type Ctx = { db: DB; llm: LanguageModel | null }
+export type Ctx = {
+  db: DB
+  llm: LanguageModel | null
+  auth: Auth & { principal: Principal | null }
+}
 
 export type ServiceMethod = (
   ctx: Ctx,
@@ -41,7 +45,8 @@ const withContext = <S extends Service>(name: string, service: S) => {
       const serviceMethodName = String(prop)
 
       return async (...args: unknown[]) => {
-        const ctx: Ctx = { db, llm }
+        const principal = await auth.authenticate()
+        const ctx: Ctx = { db, llm, auth: { ...auth, principal } }
 
         return tracer.startActiveSpan(serviceMethodName, async (span) => {
           try {

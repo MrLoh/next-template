@@ -1,16 +1,17 @@
-"use client"
+'use client'
 
-import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { XIcon } from "lucide-react"
-import { Fragment, useLayoutEffect, useState, type ComponentProps, type ReactNode } from "react"
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import { XIcon } from 'lucide-react'
+import { Fragment, useLayoutEffect, useState, type ComponentProps, type ReactNode } from 'react'
 
-import { Button } from "@/components/button"
-import { cn } from "@/utils/styling"
+import { Button } from '@/components/button'
+import { cn } from '@/utils/styling'
 
 export type DialogButtonConfig = {
   label: string
-  variant?: ComponentProps<typeof Button>["variant"]
+  variant?: ComponentProps<typeof Button>['variant']
   onClick?: () => void
+  href?: string
 }
 
 export type ImperativeDialogProps = {
@@ -52,16 +53,13 @@ function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
-function DialogOverlay({
-  className,
-  ...props
-}: DialogPrimitive.Backdrop.Props) {
+function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) {
   return (
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
-        className
+        'fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0',
+        className,
       )}
       {...props}
     />
@@ -73,17 +71,15 @@ function DialogContent({
   children,
   showCloseButton = true,
   ...props
-}: DialogPrimitive.Popup.Props & {
-  showCloseButton?: boolean
-}) {
+}: DialogPrimitive.Popup.Props & { showCloseButton?: boolean }) {
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          className
+          'fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-sm text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
+          className,
         )}
         {...props}
       >
@@ -91,16 +87,9 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            render={
-              <Button
-                variant="ghost"
-                className="absolute top-4 right-4"
-                size="icon-sm"
-              />
-            }
+            render={<Button variant="ghost" className="absolute top-4 right-4" size="icon-sm" />}
           >
-            <XIcon
-            />
+            <XIcon />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
@@ -109,13 +98,9 @@ function DialogContent({
   )
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div
-      data-slot="dialog-header"
-      className={cn("flex flex-col gap-2", className)}
-      {...props}
-    />
+    <div data-slot="dialog-header" className={cn('flex flex-col gap-2', className)} {...props} />
   )
 }
 
@@ -124,23 +109,16 @@ function DialogFooter({
   showCloseButton = false,
   children,
   ...props
-}: React.ComponentProps<"div"> & {
-  showCloseButton?: boolean
-}) {
+}: React.ComponentProps<'div'> & { showCloseButton?: boolean }) {
   return (
     <div
       data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
+      className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}
       {...props}
     >
       {children}
       {showCloseButton && (
-        <DialogPrimitive.Close render={<Button variant="outline" />}>
-          Close
-        </DialogPrimitive.Close>
+        <DialogPrimitive.Close render={<Button variant="outline" />}>Close</DialogPrimitive.Close>
       )}
     </div>
   )
@@ -150,22 +128,19 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("font-heading leading-none font-medium", className)}
+      className={cn('font-heading leading-none font-medium', className)}
       {...props}
     />
   )
 }
 
-function DialogDescription({
-  className,
-  ...props
-}: DialogPrimitive.Description.Props) {
+function DialogDescription({ className, ...props }: DialogPrimitive.Description.Props) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn(
-        "text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
-        className
+        'text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground',
+        className,
       )}
       {...props}
     />
@@ -178,7 +153,7 @@ const ImperativeDialogPanel = ({
   children,
   titleClassName,
   bodyClassName,
-  buttons = [{ label: "OK" }],
+  buttons = [{ label: 'OK' }],
   closeButton,
   className,
 }: ImperativeDialogProps) => {
@@ -189,9 +164,9 @@ const ImperativeDialogPanel = ({
           <DialogHeader>
             <DialogTitle className={titleClassName}>{title}</DialogTitle>
             {body &&
-              (typeof body === "string" ? (
+              (typeof body === 'string' ? (
                 <DialogDescription className={bodyClassName}>
-                  {body.split("\n").map((line, i, lines) => (
+                  {body.split('\n').map((line, i, lines) => (
                     <Fragment key={i}>
                       {line}
                       {i < lines.length - 1 && <br />}
@@ -199,7 +174,7 @@ const ImperativeDialogPanel = ({
                   ))}
                 </DialogDescription>
               ) : (
-                <div className={cn("text-sm text-muted-foreground", bodyClassName)}>{body}</div>
+                <div className={cn('text-sm text-muted-foreground', bodyClassName)}>{body}</div>
               ))}
           </DialogHeader>
           {buttons.length > 0 && (
@@ -208,7 +183,11 @@ const ImperativeDialogPanel = ({
                 <DialogClose
                   key={button.label}
                   render={
-                    <Button variant={button.variant ?? "default"} onClick={button.onClick} />
+                    <Button
+                      variant={button.variant ?? 'default'}
+                      onClick={button.onClick}
+                      href={button.href}
+                    />
                   }
                 >
                   {button.label}
@@ -235,7 +214,9 @@ const ControlledDialog = ({
 }
 
 const dialogStackRef = {
-  current: null as null | { pushDialog: (props: ImperativeDialogProps & { children?: never }) => void },
+  current: null as null | {
+    pushDialog: (props: ImperativeDialogProps & { children?: never }) => void
+  },
 }
 
 /** Provide target to render dialogs into imperatively with the `dialog` function. */
@@ -281,18 +262,18 @@ export const dialog = (
         ...(
           | []
           | [string]
-          | [Omit<ImperativeDialogProps & { children?: never }, "title">]
-          | [string, Omit<ImperativeDialogProps & { children?: never }, "title" | "body">]
+          | [Omit<ImperativeDialogProps & { children?: never }, 'title'>]
+          | [string, Omit<ImperativeDialogProps & { children?: never }, 'title' | 'body'>]
         ),
       ]
 ) => {
-  if (!dialogStackRef.current) throw new Error("DialogProvider not found")
-  if (typeof args[0] === "string") {
+  if (!dialogStackRef.current) throw new Error('DialogProvider not found')
+  if (typeof args[0] === 'string') {
     const [title, ...restArgs] = args
     if (restArgs.length === 0) {
       return dialogStackRef.current.pushDialog({ title })
     }
-    if (typeof restArgs[0] === "string") {
+    if (typeof restArgs[0] === 'string') {
       const [body, options] = restArgs
       return dialogStackRef.current.pushDialog({ title, body, ...(options || {}) })
     }
