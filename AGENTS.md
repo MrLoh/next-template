@@ -39,8 +39,10 @@ Imports use the `@/` alias (repo root). Scripts: `dev`, `build`, `lint`, `typech
 ## UI (Next.js App Router)
 
 - Server components are `async` and call data actions directly; mark client components with `"use client"`.
-- Mutations use `<form action={...}>` + `useActionState`, then `router.refresh()` from `next/navigation`.
 - UI components come from shadcn (in `components/`, see `components.json`), built on `@base-ui/react` primitives. Add new ones with the `shadcn` CLI rather than hand-rolling. See `components` skill for CLI gotchas (overwrite prompts, providers, error dialogs). Style with Tailwind v4 via `cn()` (`utils/styling.ts`) and `cva` variants. Reuse `utils/formatting.ts` helpers.
+- URL-synced state → `nuqs` (`useQueryState` in client components; `loadSearchParams` in server components). Already wired in root layout.
+- Client forms with Zod validation → `Form` and field primitives from `@/components/form`. Pass `schema` and an `onSubmit` that calls a `@/data` action and returns `FormResultWithError`; field errors and error dialogs are handled automatically. `FormControl` takes `render={<Input {...field} />}`, not children.
+- Simple forms without client-side validation → `<form action={...}>` + `useActionState`, then `router.refresh()`.
 
 ## Config & tests
 

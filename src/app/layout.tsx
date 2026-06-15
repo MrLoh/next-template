@@ -1,4 +1,5 @@
 import { Geist_Mono, Inter } from 'next/font/google'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 import './globals.css'
 
@@ -18,9 +19,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={cn('antialiased', fontMono.variable, 'font-sans', inter.variable)}
     >
       <body>
-        <ThemeProvider>
-          <DialogProvider>{children}</DialogProvider>
-        </ThemeProvider>
+        <NuqsAdapter>
+          <ThemeProvider>
+            <DialogProvider>{children}</DialogProvider>
+          </ThemeProvider>
+        </NuqsAdapter>
       </body>
     </html>
   )

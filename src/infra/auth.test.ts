@@ -1,122 +1,69 @@
-import { auth, type CookieStore, type HeaderStore } from '@/infra/auth'
+import config from '@/config'
+import { auth } from '@/infra/auth'
+import { testRequest } from '@/test-helpers'
 
-const createCookieStore = () => {
-  const cookies = new Map<string, string>()
-  const store: CookieStore = {
-    get: (name) => {
-      const value = cookies.get(name)
-      return value ? { name, value } : undefined
-    },
-    set: (name, value) => {
-      cookies.set(name, value)
-    },
-    delete: (name) => {
-      cookies.delete(name)
-    },
-  }
-  return store
-}
-
-const createHeaderStore = (authorization?: string): HeaderStore => ({
-  get: (name) => (name.toLowerCase() === 'authorization' ? (authorization ?? null) : null),
-})
-
-describe('sessionProvider', () => {
+describe('auth', () => {
   it('creates and resolves a session from a cookie', async () => {
-    // Given a cookie store
-    const cookies = createCookieStore()
-
-    // When creating a session
-    await auth.setSessionCookie(cookies, {
-      kind: 'user',
+    // Given a cookie session
+    await auth.setSessionCookie({
       id: 'user-1',
-      displayName: 'alice',
+      role: 'patient',
+      name: 'alice',
       scopes: ['sleep:read'],
     })
 
     // Then the principal resolves from the cookie
-    const principal = await auth.authenticate({ cookies, headers: createHeaderStore() })
+    const principal = await auth.authenticate()
     expect(principal).toMatchObject({
-      kind: 'user',
       id: 'user-1',
-      displayName: 'alice',
+      role: 'patient',
+      name: 'alice',
       scopes: ['sleep:read'],
     })
   })
 
   it('creates and resolves a session from a bearer token', async () => {
     // Given a signed token
-    const cookies = createCookieStore()
-    const token = await auth.setSessionCookie(cookies, {
-      kind: 'user',
-      id: 'user-2',
-      displayName: 'bob',
-      scopes: [],
-    })
-
-    // When resolving from the Authorization header
-    const principal = await auth.authenticate({
-      cookies: createCookieStore(),
-      headers: createHeaderStore(`Bearer ${token}`),
-    })
+    const token = await auth.createJwt({ id: 'user-2', role: 'patient', name: 'bob' }, 60_000)
+    testRequest.setBearerToken(token)
 
     // Then the principal matches the token payload
-    expect(principal).toMatchObject({ kind: 'user', id: 'user-2', displayName: 'bob' })
+    const principal = await auth.authenticate()
+    expect(principal).toMatchObject({ id: 'user-2', role: 'patient', name: 'bob' })
   })
 
   it('prefers the bearer token over the cookie', async () => {
     // Given a cookie session and a separate bearer token
-    const cookies = createCookieStore()
-    await auth.setSessionCookie(cookies, {
-      kind: 'user',
-      id: 'user-cookie',
-      displayName: 'cookie-user',
-      scopes: [],
-    })
-    const bearerToken = await auth.setSessionCookie(createCookieStore(), {
-      kind: 'user',
-      id: 'user-bearer',
-      displayName: 'bearer-user',
-      scopes: [],
-    })
-
-    // When both are present
-    const principal = await auth.authenticate({
-      cookies,
-      headers: createHeaderStore(`Bearer ${bearerToken}`),
-    })
+    await auth.setSessionCookie({ id: 'user-cookie', role: 'patient', name: 'cookie-user' })
+    const bearerToken = await auth.createJwt(
+      { id: 'user-bearer', role: 'clinician', name: 'bearer-user' },
+      60_000,
+    )
+    testRequest.setBearerToken(bearerToken)
 
     // Then the bearer token wins
-    expect(principal).toMatchObject({ kind: 'user', id: 'user-bearer', displayName: 'bearer-user' })
+    const principal = await auth.authenticate()
+    expect(principal).toMatchObject({ id: 'user-bearer', role: 'clinician', name: 'bearer-user' })
   })
 
   it('clears the cookie on logout', async () => {
     // Given an active cookie session
-    const cookies = createCookieStore()
-    await auth.setSessionCookie(cookies, {
-      kind: 'user',
-      id: 'user-3',
-      displayName: 'carol',
-      scopes: [],
-    })
+    await auth.setSessionCookie({ id: 'user-3', role: 'patient', name: 'carol' })
 
-    // When expiring the session
-    const expired = auth.expireSession(cookies)
+    // When deleting the session
+    const hadCookie = await auth.deleteSessionCookie()
 
     // Then the cookie is cleared and the session no longer resolves
-    expect(expired).toBe(true)
-    expect(cookies.get('session')).toBeUndefined()
-    expect(await auth.authenticate({ cookies, headers: createHeaderStore() })).toBeNull()
+    expect(hadCookie).toBe(true)
+    expect(testRequest.cookies().get(config.SESSION_COOKIE_NAME)).toBeUndefined()
+    expect(await auth.authenticate()).toBeNull()
   })
 
   it('returns null for an invalid token', async () => {
     // Given a bad bearer token
-    const session = await auth.authenticate({
-      cookies: createCookieStore(),
-      headers: createHeaderStore('Bearer not-a-jwt'),
-    })
+    testRequest.setBearerToken('not-a-jwt')
 
     // Then nothing is returned
-    expect(session).toBeNull()
+    expect(await auth.authenticate()).toBeNull()
   })
 })

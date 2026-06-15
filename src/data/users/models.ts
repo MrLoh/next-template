@@ -8,11 +8,11 @@ export const userRoleSchema = z.enum(['patient', 'clinician'])
 
 export type UserRole = z.infer<typeof userRoleSchema>
 
-export const User = z.object({
+export const userSchema = z.object({
   id: z.uuid().transform((val) => val as UserId),
   name: z.string(),
   role: userRoleSchema,
   createdAt: z.date(),
 })
 
-export type User = z.infer<typeof User>
+export type User = z.infer<typeof userSchema>

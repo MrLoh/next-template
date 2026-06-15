@@ -116,16 +116,16 @@ describe('hashPassword/verifyPasswordHash', () => {
 describe('signJwt/verifyJwt', () => {
   it('should sign and verify a JWT', async () => {
     // Given a payload
-    const payload = { sub: 'user-1', kind: 'user', displayName: 'alice' }
+    const payload = { sub: 'user-1', role: 'patient', name: 'alice' }
     // When signing and verifying the token
-    const token = await signJwt(payload)
-    const { payload: verified } = await verifyJwt(token)
+    const token = await signJwt(payload, 60_000)
+    const verified = await verifyJwt(token)
     // Then the verified payload should match
-    expect(verified.sub).toBe('user-1')
-    expect(verified.kind).toBe('user')
-    expect(verified.displayName).toBe('alice')
-    expect(verified.iat).toBeDefined()
-    expect(verified.exp).toBeDefined()
+    expect(verified?.sub).toBe('user-1')
+    expect(verified?.role).toBe('patient')
+    expect(verified?.name).toBe('alice')
+    expect(verified?.iat).toBeDefined()
+    expect(verified?.exp).toBeDefined()
   })
 
   it('should honor a custom max age', async () => {
@@ -133,18 +133,18 @@ describe('signJwt/verifyJwt', () => {
     const maxAge = 60_000
     // When signing and verifying the token
     const token = await signJwt({ sub: 'user-1' }, maxAge)
-    const { payload } = await verifyJwt(token)
+    const payload = await verifyJwt(token)
     // Then the token should expire in 60 seconds
-    expect(payload.exp! - payload.iat!).toBe(60)
+    expect(payload!.exp! - payload!.iat!).toBe(60)
   })
 
   it('should reject an invalid token', async () => {
     // Given an invalid token
     const token = 'not-a-jwt'
     // When verifying the token
-    const verify = verifyJwt(token)
+    const verified = await verifyJwt(token)
     // Then verification should fail
-    await expect(verify).rejects.toThrow()
+    expect(verified).toBeNull()
   })
 })
 
