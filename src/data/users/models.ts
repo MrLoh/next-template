@@ -1,15 +1,13 @@
 import { z } from 'zod'
 
-import type { Nominal } from '@/utils/typing'
-
-export type UserId = Nominal<string, 'UserId'>
+export type UserId = string
 
 export const userRoleSchema = z.enum(['patient', 'clinician'])
 
 export type UserRole = z.infer<typeof userRoleSchema>
 
 export const userSchema = z.object({
-  id: z.uuid().transform((val) => val as UserId),
+  id: z.uuid(),
   name: z.string(),
   role: userRoleSchema,
   createdAt: z.date(),

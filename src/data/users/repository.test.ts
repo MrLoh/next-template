@@ -1,7 +1,7 @@
 import { createDbClient } from '@/infra/db'
 import { createTestUuid } from '@/test-helpers'
 
-import type { User, UserId } from './models'
+import type { User } from './models'
 import userRepository from './repository'
 
 describe('userRepository', () => {
@@ -12,7 +12,7 @@ describe('userRepository', () => {
     it('persists a user', async () => {
       // Given a user
       const user: User = {
-        id: createTestUuid<UserId>(),
+        id: createTestUuid(),
         name: createTestUuid(),
         role: 'patient',
         createdAt: new Date('2026-06-01T12:00:00.000Z'),
@@ -41,7 +41,7 @@ describe('userRepository', () => {
     it('returns the stored user', async () => {
       // Given an inserted user
       const user: User = {
-        id: createTestUuid<UserId>(),
+        id: createTestUuid(),
         name: createTestUuid(),
         role: 'patient',
         createdAt: new Date('2026-06-02T08:30:00.000Z'),
@@ -59,7 +59,7 @@ describe('userRepository', () => {
   describe('getUser', () => {
     it('returns null when the user does not exist', async () => {
       // Given a random id
-      const id = createTestUuid<UserId>()
+      const id = createTestUuid()
 
       // When loading the user
       const user = await userRepository.getUser(db, id)
@@ -73,7 +73,7 @@ describe('userRepository', () => {
     it('returns true and removes the user when they exist', async () => {
       // Given an inserted user
       const user: User = {
-        id: createTestUuid<UserId>(),
+        id: createTestUuid(),
         name: createTestUuid(),
         role: 'patient',
         createdAt: new Date(),
@@ -90,7 +90,7 @@ describe('userRepository', () => {
 
     it('returns false when the user does not exist', async () => {
       // Given a random id
-      const id = createTestUuid<UserId>()
+      const id = createTestUuid()
 
       // When deleting the user
       const deleted = await userRepository.deleteUser(db, id)

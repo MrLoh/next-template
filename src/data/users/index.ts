@@ -3,7 +3,6 @@ import { invalidInput, unauthenticated } from '@/utils/errors'
 import { ok } from '@/utils/result'
 
 import type { Ctx } from '../context'
-import type { UserId } from './models'
 import userRepository from './repository'
 
 export const userService = {
@@ -15,7 +14,7 @@ export const userService = {
       return invalidInput({ name: 'Username is already taken' })
     }
 
-    const user = { id: uuid<UserId>(), name, role: 'patient' as const, createdAt: new Date() }
+    const user = { id: uuid(), name, role: 'patient' as const, createdAt: new Date() }
     await userRepository.insertUser(db, user)
     await auth.setSessionCookie(user)
 

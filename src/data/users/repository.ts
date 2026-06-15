@@ -10,12 +10,7 @@ const userRepository = {
       .where('id', '=', id)
       .executeTakeFirst()
     if (!user) return null
-    return {
-      id: user.id as UserId,
-      name: user.name,
-      role: user.role,
-      createdAt: new Date(user.created_at),
-    }
+    return { id: user.id, name: user.name, role: user.role, createdAt: new Date(user.created_at) }
   },
 
   findByName: async (tx: DB, name: string): Promise<User | null> => {
@@ -25,12 +20,7 @@ const userRepository = {
       .where('name', '=', name)
       .executeTakeFirst()
     if (!user) return null
-    return {
-      id: user.id as UserId,
-      name: user.name,
-      role: user.role,
-      createdAt: new Date(user.created_at),
-    }
+    return { id: user.id, name: user.name, role: user.role, createdAt: new Date(user.created_at) }
   },
 
   insertUser: async (tx: DB, user: User) => {

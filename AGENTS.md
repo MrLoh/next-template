@@ -34,7 +34,6 @@ Imports use the `@/` alias (repo root). Scripts: `dev`, `build`, `lint`, `typech
 ## Models & types
 
 - Validate/parse with Zod (`z.object`, `z.infer`).
-- Use nominal types for ids: `Nominal<string, "UserId">` (`utils/typing.ts`).
 
 ## UI (Next.js App Router)
 

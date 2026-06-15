@@ -1,6 +1,6 @@
 import { call, ORPCError } from '@orpc/server'
 
-import type { User, UserId } from '@/data'
+import type { User } from '@/data'
 import userRepository from '@/data/users/repository'
 import { generateOpenAPISpec } from '@/helpers/openapi'
 import { auth, db } from '@/infra'
@@ -34,7 +34,7 @@ describe('API routes', () => {
     it('returns the current user from the data layer', async () => {
       // Given a real user in the database and a signed token for them
       const user: User = {
-        id: createTestUuid<UserId>(),
+        id: createTestUuid(),
         name: createTestUuid(),
         role: 'patient',
         createdAt: new Date('2026-01-01T00:00:00.000Z'),
