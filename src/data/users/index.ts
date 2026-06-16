@@ -40,10 +40,7 @@ export const userService = {
   getCurrentUser: async ({ auth, db }: Ctx) => {
     if (!auth.principal) return unauthenticated()
     const user = await userRepository.getUser(db, auth.principal.id)
-    if (!user) {
-      await auth.deleteSessionCookie()
-      return unauthenticated()
-    }
+    if (!user) return unauthenticated()
     return ok(user)
   },
 }

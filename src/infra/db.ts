@@ -1,4 +1,4 @@
-import { Kysely, PostgresDialect } from 'kysely'
+import { Kysely, PostgresDialect, type Selectable } from 'kysely'
 import { Pool } from 'pg'
 
 import config from '@/config'
@@ -15,7 +15,10 @@ pool.on('error', (e) => {
   console.error('postgres pool error', e)
 })
 
+export type DB = Kysely<DbTypes>
+export type Row<T extends keyof DbTypes & string> = Selectable<DbTypes[T]>
+export type { Json } from '../../db/types'
+
 export const createDbClient = () => new Kysely<DbTypes>({ dialect: new PostgresDialect({ pool }) })
 
-export type DB = Kysely<DbTypes>
 export { sql } from 'kysely'

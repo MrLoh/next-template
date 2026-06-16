@@ -1,10 +1,25 @@
 import { randomBytes } from 'crypto'
 import { beforeEach, vi } from 'vitest'
 
+import type { User } from '@/data/users/models'
+import userRepository from '@/data/users/repository'
+import type { DB } from '@/infra/db'
+
 import { TEST_UUID_PATTERN } from '../vitest.setup'
 
-export const createTestUuid = <T extends string = string>(): T =>
-  `${TEST_UUID_PATTERN}${randomBytes(6).toString('hex')}` as T
+export const createTestUuid = (): string => `${TEST_UUID_PATTERN}${randomBytes(6).toString('hex')}`
+
+export const createTestUser = async (db: DB, overrides: Partial<User> = {}): Promise<User> => {
+  const user: User = {
+    id: createTestUuid(),
+    name: createTestUuid(),
+    role: 'patient',
+    createdAt: new Date(),
+    ...overrides,
+  }
+  await userRepository.insertUser(db, user)
+  return user
+}
 
 export const isTestUuid = (id: string): boolean => id.startsWith(TEST_UUID_PATTERN)
 

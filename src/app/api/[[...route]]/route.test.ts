@@ -1,10 +1,8 @@
 import { call, ORPCError } from '@orpc/server'
 
-import type { User } from '@/data'
-import userRepository from '@/data/users/repository'
 import { generateOpenAPISpec } from '@/helpers/openapi'
 import { auth, db } from '@/infra'
-import { createTestUuid, testRequest } from '@/test-helpers'
+import { createTestUser, testRequest } from '@/test-helpers'
 
 import { handleRequest, router } from './route'
 
@@ -33,13 +31,7 @@ describe('API routes', () => {
 
     it('returns the current user from the data layer', async () => {
       // Given a real user in the database and a signed token for them
-      const user: User = {
-        id: createTestUuid(),
-        name: createTestUuid(),
-        role: 'patient',
-        createdAt: new Date('2026-01-01T00:00:00.000Z'),
-      }
-      await userRepository.insertUser(db, user)
+      const user = await createTestUser(db, { createdAt: new Date('2026-01-01T00:00:00.000Z') })
       const token = await auth.createJwt({ id: user.id, role: user.role, name: user.name }, 60_000)
       testRequest.setBearerToken(token)
 
